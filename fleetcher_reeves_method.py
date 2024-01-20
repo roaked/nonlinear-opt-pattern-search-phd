@@ -1,6 +1,11 @@
 import numpy as np
+from scipy.optimize import line_search, golden
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
-def golden_section_search(f, a, b, epsilon):
+"""Using golden section method for computing fletcher reeves"""
+
+def golden_section(f, a, b, epsilon): #univar
     alpha = 0.618  # golden ratio
     varlambda = a + (1 - alpha) * (b - a)  # base case
     varmu = a + alpha * (b - a)  # base case
@@ -19,42 +24,66 @@ def golden_section_search(f, a, b, epsilon):
 
     return f((a + b) / 2), (a + b) / 2
 
-def fletcher_reeves_method(f, x1, x2, epsilon, a, b):
-    y1 = x1 # base cases
-    grad_k = gradient([x1, x2])
+def fletcher_reeves(Xj, f, epsilon): # initialization
+    x1, x2, NORM = [Xj[0]], [Xj[1]], np.linalg.norm  # initial guesses 
+    Df = gradient
+    grad_k = gradient(Xj)
     d = - grad_k  
+    v_lam = []
 
-    for k in range(100_000):
-        _, varlambda = golden_section_search(lambda x: f([x, x2]), a, b, epsilon)
+    while True:
+        start_point = Xj # start point
+        v_lambda = golden(lambda lam: f(start_point + lam * d), brack=(a,b), tol=epsilon)
+        v_lam.append(v_lambda)
 
-        y1 = y1 + varlambda * d 
-        grad_k1 = gradient([x1, x2]) # fix gradient calcs
+        if v_lambda is not None:
+            X = Xj + v_lambda * d # update exp point
+            x1.append(X[0])
+            x2.append(X[1])
 
-        alpha = np.dot(grad_k1, grad_k1) / np.dot(grad_k, grad_k) 
+        if NORM(Df(X)) < epsilon:
+            return x1, x2, v_lam
 
-        d = -grad_k1 + alpha * d  
-
-        if np.linalg.norm(grad_k1) < epsilon:
-            break  
-
-        grad_k = grad_k1  # update me
-
-    return [x1, x2], k+1 # result and iterations
-
+        else:
+            Xj = X
+            temp = grad_k # grad at preceding point
+            grad_k = Df(Xj) # grad at current point
+            chi = NORM(grad_k)**2/ NORM(temp)**2 
+            d = - grad_k + chi*d # new updated descent direction
+            x1.append(Xj[0])
+            x2.append(Xj[1])
 def f(x):
-    return (x[0] - 2)**4 + (x[0] - 2 * x[1])**2
+    return  (x[0] - 2*x[1])**2 + (x[0] - 2)**4
 
 def gradient(x):
-    df_dx1 = 4 * (x[0] - 2)**3 + 2 * (x[0] - 2 * x[1])
-    df_dx2 = -4 * (x[0] - 2 * x[1])
+    df_dx1 = 2*x[0] - 4*x[1] + 4*(x[0]-2)**3 
+    df_dx2 = 8*x[1] - 4*x[0]
     return np.array([df_dx1, df_dx2])
 
-a, b, epsilon = 0, 3, 0.02
-
-init = np.array([0.0, 3.0])
-result, iterations = fletcher_reeves_method(f, init[0], init[1], epsilon, a, b) # problem 2d
+#def fletcher_reeves(Xj, epsilon, alpha_1, alpha_2):
+a, b, epsilon = -1, 11, 0.02
+init_guess = Xj = np.array([0.0, 3.0])
+x1, x2, v_lam = fletcher_reeves(init_guess, f, epsilon) # problem 2d
 
 #Initial interval and accuracy
 
-print("Optimal Point:", result)
-print("Iterations:", iterations)
+print("X1: ", x1)
+print("X2: ", x2)
+print("Lambda: ", v_lam)
+
+# Plots
+contour_x = np.linspace(0, 3, 100)
+contour_y = np.linspace(0, 3, 100)
+X, Y = np.meshgrid(contour_x, contour_y)
+Z = f([X, Y])
+
+plt.figure(figsize=(10, 8))
+contour = plt.contour(X, Y, Z, levels=10, cmap='viridis')
+plt.scatter(x1[::3], x2[::3], c='blue', marker='x', label='Optimization Path')
+plt.plot(x1[::3], x2[::3], linestyle='-', color='k', alpha=1)
+plt.title('Optimization Contour Plot')
+plt.xlabel('x1')
+plt.ylabel('x2')
+plt.colorbar(contour, label='Function Value')
+plt.legend()
+plt.show()
