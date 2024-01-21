@@ -34,7 +34,7 @@ def dfp(Xj, epsilon):
             Gj = gradient(X) - Grad # grad f(x) - grad f(xj)
             w1 = Dj 
             w2 = Bf.dot(Gj) 
-            w1T, w2T = w1.T, w2.T
+            w1T, w2T = w1.T, w2.T # transpose
             sigma1, sigma2 = 1/(w1T.dot(Gj)), -1/(w2T.dot(Gj)) 
             W1, W2 = np.outer(w1, w1), np.outer(w2, w2)
 
