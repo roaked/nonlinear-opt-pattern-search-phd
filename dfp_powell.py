@@ -12,7 +12,7 @@ def gradient(x):
 
 def dfp(Xj, epsilon):
     x1, x2 = [Xj[0]], [Xj[1]]
-    Bf = np.eye(len(Xj)) # diagonal with 1's
+    Bf = np.eye(len(Xj)) # positive definite matrix for hessian approx
     v_lam = [] # for lambda values
 
     while True:
@@ -38,7 +38,7 @@ def dfp(Xj, epsilon):
             sigma1, sigma2 = 1/(w1T.dot(Gj)), -1/(w2T.dot(Gj)) 
             W1, W2 = np.outer(w1, w1), np.outer(w2, w2)
 
-            Delta = sigma1*W1 + sigma2*W2 
+            Delta = sigma1 * W1 + sigma2 * W2 
             Bf += Delta
             Xj = X 
             x1.append(X[0]), x2.append(X[1])
