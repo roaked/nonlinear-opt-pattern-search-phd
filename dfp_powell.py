@@ -17,8 +17,8 @@ def dfp(Xj, epsilon):
 
     while True:
         Grad = gradient(Xj)
-        d = -Bf.dot(Grad) # direction of the steepest descent   
-        start_point = Xj # start point for step length selection 
+        d = -Bf.dot(Grad) # direction // steep descent   
+        start_point = Xj # start sol 
         v_lambda = golden(lambda lam: f(start_point + lam * d), brack=(a,b), tol=epsilon)
         v_lam.append(v_lambda)
 
@@ -29,9 +29,9 @@ def dfp(Xj, epsilon):
             x1.append(X[0]), x2.append(X[1])
             return X, f(X), v_lambda, x1, x2
         
-        else:
+        else: # y = X
             Dj = X - Xj 
-            Gj = gradient(X) - Grad 
+            Gj = gradient(X) - Grad # grad f(x) - grad f(xj)
             w1 = Dj 
             w2 = Bf.dot(Gj) 
             w1T, w2T = w1.T, w2.T
@@ -44,7 +44,7 @@ def dfp(Xj, epsilon):
             x1.append(X[0]), x2.append(X[1])
 
 NORM = np.linalg.norm
-a, b, epsilon, alpha_1, alpha_2 = -1, 11, 0.002, 10**(-4) ,3.82
+a, b, epsilon, alpha_1, alpha_2 = -1, 11, 0.02, 10**(-4) ,3.82
 init_guess = Xj = np.array([0.0, 3.0])
 x, fx, v_lam, t_x1, t_x2 = dfp(init_guess, epsilon) # problem 2d
 
