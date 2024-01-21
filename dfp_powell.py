@@ -27,8 +27,6 @@ def dfp(Xj, epsilon):
 
         if NORM(gradient(X)) < epsilon:
             x1.append(X[0]), x2.append(X[1])
-            plt.plot(x1, x2, "rx-", ms=5.5) # final collected data showing the trajectory of optimization
-            plt.show()
             return X, f(X), v_lambda, x1, x2
         
         else:
@@ -48,17 +46,19 @@ def dfp(Xj, epsilon):
 NORM = np.linalg.norm
 a, b, epsilon, alpha_1, alpha_2 = -1, 11, 0.002, 10**(-4) ,3.82
 init_guess = Xj = np.array([0.0, 3.0])
-x, fx, v_lam, x1, x2 = dfp(init_guess, epsilon) # problem 2d
+x, fx, v_lam, t_x1, t_x2 = dfp(init_guess, epsilon) # problem 2d
 
-x1 = np.linspace(-10, 10, 100)
-x2 = np.linspace(-10, 10, 100)
+x1 = np.linspace(0, 3, 25)
+x2 = np.linspace(0, 3, 25)
 z = np.zeros(([len(x1), len(x2)]))
 for i in range(0, len(x1)):
     for j in range(0, len(x2)):
         z[j, i] = f([x1[i], x2[j]])
 
-contours = plt.contour(x1, x2, z, 100, cmap=plt.cm.viridis)  # Change cmap to viridis
+contours = plt.contour(x1, x2, z, 15, cmap=plt.cm.viridis)  # Change cmap to viridis
 plt.clabel(contours, inline=1, fontsize=2)
-plt.xlabel("$x_1$ ->")
-plt.ylabel("$x_2$ ->")
+plt.xlabel("$x_1$")
+plt.ylabel("$x_2$")
+
+plt.plot(t_x1, t_x2, "rx-", ms=5.5)  # Plot the trajectory
 plt.show()
